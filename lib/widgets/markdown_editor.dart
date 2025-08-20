@@ -137,69 +137,75 @@ class MarkdownEditorState extends State<MarkdownEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final maxWidth = screenWidth > 1200 ? 800.0 : screenWidth * 0.8;
+    
     return Container(
       color: AppColors.editorBackground,
       padding: const EdgeInsets.all(AppConstants.defaultPadding),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.editorBackground,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 제목 입력
-              TextField(
-                controller: _titleController,
-                focusNode: _titleFocusNode,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  height: 1.2,
-                ),
-                decoration: const InputDecoration(
-                  hintText: '제목 없음',
-                  hintStyle: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                maxLines: null,
-                textInputAction: TextInputAction.next,
-                onSubmitted: (_) => _contentFocusNode.requestFocus(),
-              ),
-              const SizedBox(height: 16),
-              // 내용 입력
-              Expanded(
-                child: TextField(
-                  controller: _contentController,
-                  focusNode: _contentFocusNode,
+      child: Center(
+        child: Container(
+          width: maxWidth,
+          decoration: const BoxDecoration(
+            color: AppColors.editorBackground,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // 제목 입력
+                TextField(
+                  controller: _titleController,
+                  focusNode: _titleFocusNode,
                   style: const TextStyle(
                     color: AppColors.textPrimary,
-                    fontSize: AppConstants.bodyFontSize,
-                    height: 1.6,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    height: 1.2,
                   ),
                   decoration: const InputDecoration(
-                    hintText: '내용을 입력하세요...\n\n마크다운 문법을 사용할 수 있습니다.',
+                    hintText: '제목 없음',
                     hintStyle: TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: AppConstants.bodyFontSize,
-                      height: 1.6,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.zero,
                   ),
                   maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
+                  textInputAction: TextInputAction.next,
+                  onSubmitted: (_) => _contentFocusNode.requestFocus(),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                // 내용 입력
+                Expanded(
+                  child: TextField(
+                    controller: _contentController,
+                    focusNode: _contentFocusNode,
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: AppConstants.bodyFontSize,
+                      height: 1.6,
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: '내용을 입력하세요...\n\n마크다운 문법을 사용할 수 있습니다.',
+                      hintStyle: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: AppConstants.bodyFontSize,
+                        height: 1.6,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    maxLines: null,
+                    expands: true,
+                    textAlignVertical: TextAlignVertical.top,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

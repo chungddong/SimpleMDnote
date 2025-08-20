@@ -15,7 +15,9 @@
       "Bash(del libwidgetsfile_tree.dart)",
       "Bash(copy libwidgetsfile_tree_new.dart libwidgetsfile_tree.dart)",
       "Bash(del libwidgetsfile_tree_new.dart)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git commit:*)",
+      "Bash(wmic process where name=\"simplemdnote.exe\":*)"
     ],
     "deny": [],
     "ask": []

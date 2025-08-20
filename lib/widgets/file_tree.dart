@@ -246,100 +246,202 @@ class _FileTreeItemWidgetState extends State<FileTreeItemWidget> {
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          height: 32,
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-          padding: EdgeInsets.only(left: 8 + indent),
-          decoration: BoxDecoration(
-            color: widget.item.isSelected
-                ? AppColors.highlightColor.withOpacity(0.2)
-                : _isHovered
-                    ? AppColors.textSecondary.withOpacity(0.1)
-                    : null,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Row(
-            children: [
-              // 폴더 토글 버튼
-              if (widget.item.isFolder) ...[
-                InkWell(
-                  onTap: widget.onToggle,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    alignment: Alignment.center,
-                    child: Icon(
-                      widget.item.isExpanded 
-                          ? Icons.keyboard_arrow_down 
-                          : Icons.keyboard_arrow_right,
-                      size: 16,
-                      color: AppColors.textSecondary,
+      child: widget.item.isFolder 
+          ? GestureDetector(
+              onTap: widget.onTap,
+              child: Container(
+                height: 32,
+                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                padding: EdgeInsets.only(left: 8 + indent),
+                decoration: BoxDecoration(
+                  color: widget.item.isSelected
+                      ? AppColors.highlightColor.withOpacity(0.2)
+                      : _isHovered
+                          ? AppColors.textSecondary.withOpacity(0.1)
+                          : null,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  children: [
+                    // 폴더 토글 버튼
+                    InkWell(
+                      onTap: widget.onToggle,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          widget.item.isExpanded 
+                              ? Icons.keyboard_arrow_down 
+                              : Icons.keyboard_arrow_right,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
                     ),
-                  ),
+                    
+                    // 아이콘
+                    Icon(
+                      widget.item.isExpanded ? Icons.folder_open : Icons.folder,
+                      size: 16,
+                      color: AppColors.highlightColor,
+                    ),
+                    const SizedBox(width: 8),
+                    
+                    // 폴더 이름
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        widget.item.name,
+                        style: TextStyle(
+                          color: widget.item.isSelected 
+                              ? AppColors.textPrimary
+                              : AppColors.textSecondary,
+                          fontSize: 13,
+                          fontWeight: widget.item.isSelected 
+                              ? FontWeight.w500 
+                              : FontWeight.normal,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    
+                    // 호버 시 생성 버튼들
+                    if (_isHovered) ...[
+                      const SizedBox(width: 2),
+                      Container(
+                        constraints: const BoxConstraints(maxWidth: 40),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _HoverButton(
+                              icon: Icons.note_add,
+                              tooltip: '파일 생성',
+                              onPressed: widget.onCreateFile,
+                            ),
+                            const SizedBox(width: 2),
+                            _HoverButton(
+                              icon: Icons.create_new_folder,
+                              tooltip: '폴더 생성',
+                              onPressed: widget.onCreateFolder,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              ] else
-                const SizedBox(width: 20),
-              
-              // 아이콘
-              Icon(
-                widget.item.isFolder 
-                    ? (widget.item.isExpanded ? Icons.folder_open : Icons.folder)
-                    : Icons.note,
-                size: 16,
-                color: widget.item.isFolder 
-                    ? AppColors.highlightColor
-                    : AppColors.textSecondary,
               ),
-              const SizedBox(width: 8),
-              
-              // 파일/폴더 이름
-              Expanded(
-                flex: 1,
-                child: Text(
-                  widget.item.name,
-                  style: TextStyle(
-                    color: widget.item.isSelected 
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
-                    fontSize: 13,
-                    fontWeight: widget.item.isSelected 
-                        ? FontWeight.w500 
-                        : FontWeight.normal,
+            )
+          : Draggable<FileTreeItem>(
+              data: widget.item,
+              feedback: Material(
+                elevation: 4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.highlightColor.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              
-              // 호버 시 생성 버튼들
-              if (_isHovered && widget.item.isFolder) ...[
-                const SizedBox(width: 2),
-                Container(
-                  constraints: const BoxConstraints(maxWidth: 40),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _HoverButton(
-                        icon: Icons.note_add,
-                        tooltip: '파일 생성',
-                        onPressed: widget.onCreateFile,
+                      Icon(
+                        Icons.note,
+                        size: 16,
+                        color: Colors.white,
                       ),
-                      const SizedBox(width: 2),
-                      _HoverButton(
-                        icon: Icons.create_new_folder,
-                        tooltip: '폴더 생성',
-                        onPressed: widget.onCreateFolder,
+                      const SizedBox(width: 4),
+                      Text(
+                        widget.item.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ],
-          ),
-        ),
-      ),
+              ),
+              childWhenDragging: Container(
+                height: 32,
+                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                padding: EdgeInsets.only(left: 8 + indent),
+                decoration: BoxDecoration(
+                  color: AppColors.textSecondary.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 20),
+                    Icon(
+                      Icons.note,
+                      size: 16,
+                      color: AppColors.textSecondary.withOpacity(0.5),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        widget.item.name,
+                        style: TextStyle(
+                          color: AppColors.textSecondary.withOpacity(0.5),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              child: GestureDetector(
+                onTap: widget.onTap,
+                child: Container(
+                  height: 32,
+                  margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                  padding: EdgeInsets.only(left: 8 + indent),
+                  decoration: BoxDecoration(
+                    color: widget.item.isSelected
+                        ? AppColors.highlightColor.withOpacity(0.2)
+                        : _isHovered
+                            ? AppColors.textSecondary.withOpacity(0.1)
+                            : null,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 20),
+                      
+                      // 아이콘
+                      Icon(
+                        Icons.note,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 8),
+                      
+                      // 파일 이름
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          widget.item.name,
+                          style: TextStyle(
+                            color: widget.item.isSelected 
+                                ? AppColors.textPrimary
+                                : AppColors.textSecondary,
+                            fontSize: 13,
+                            fontWeight: widget.item.isSelected 
+                                ? FontWeight.w500 
+                                : FontWeight.normal,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
     );
   }
 }
