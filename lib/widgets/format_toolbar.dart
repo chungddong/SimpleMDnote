@@ -22,10 +22,12 @@ class FormatToolbar extends StatelessWidget {
           ),
         ],
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
+      child: Center(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             _FormatButton(
               icon: Icons.title,
               tooltip: '제목 1',
@@ -86,7 +88,8 @@ class FormatToolbar extends StatelessWidget {
               tooltip: '코드',
               onPressed: () => onFormatPressed?.call('code'),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
