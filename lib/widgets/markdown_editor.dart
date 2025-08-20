@@ -4,8 +4,9 @@ import '../constants/app_constants.dart';
 
 class MarkdownEditor extends StatefulWidget {
   final TextEditingController? controller;
+  final VoidCallback? onContentChanged;
   
-  const MarkdownEditor({super.key, this.controller});
+  const MarkdownEditor({super.key, this.controller, this.onContentChanged});
 
   @override
   State<MarkdownEditor> createState() => MarkdownEditorState();
@@ -16,12 +17,22 @@ class MarkdownEditorState extends State<MarkdownEditor> {
   late TextEditingController _contentController;
   final FocusNode _titleFocusNode = FocusNode();
   final FocusNode _contentFocusNode = FocusNode();
+  bool _isUpdatingContent = false;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController();
     _contentController = widget.controller ?? TextEditingController();
+    
+    // 내용 변경 감지 리스너 추가
+    _titleController.addListener(_onContentChanged);
+    _contentController.addListener(_onContentChanged);
+  }
+  
+  void _onContentChanged() {
+    if (_isUpdatingContent) return;
+    widget.onContentChanged?.call();
   }
 
   @override
@@ -197,4 +208,20 @@ class MarkdownEditorState extends State<MarkdownEditor> {
 
   TextEditingController get titleController => _titleController;
   TextEditingController get contentController => _contentController;
+  
+  void setContent(String title, String content) {
+    _isUpdatingContent = true;
+    _titleController.text = title;
+    _contentController.text = content;
+    
+    // 다음 프레임에서 플래그 해제
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _isUpdatingContent = false;
+    });
+  }
+  
+  void clearContent() {
+    _titleController.clear();
+    _contentController.clear();
+  }
 }

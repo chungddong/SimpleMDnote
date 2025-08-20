@@ -9,12 +9,14 @@ class SideBar extends StatefulWidget {
   final double? width;
   final bool isCollapsed;
   final VoidCallback? onToggle;
+  final Function(FileTreeItem)? onFileSelected;
 
   const SideBar({
     super.key,
     this.width,
     this.isCollapsed = false,
     this.onToggle,
+    this.onFileSelected,
   });
 
   @override
@@ -56,8 +58,9 @@ class _SideBarState extends State<SideBar> {
   }
 
   void _onItemTapped(FileTreeItem item) {
-    print('선택된 파일: ${item.name}');
-    // TODO: 파일 내용 로드 및 에디터에 표시
+    if (!item.isFolder) {
+      widget.onFileSelected?.call(item);
+    }
   }
 
   void _onItemToggled(FileTreeItem item) {
