@@ -7,6 +7,6 @@ class AppColors {
   static const Color textSecondary = Colors.grey;
   static const Color dividerColor = Colors.grey;
   static const Color highlightColor = Color(0xFF2563EB);
-  static const Color editorBackground = Color(0xFF1A1F35);
+  static const Color editorBackground = Color(0xFF181B28);
   static const Color tabBackground = Color(0xFF0F1322);
 }

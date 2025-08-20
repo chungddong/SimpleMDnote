@@ -7,7 +7,15 @@
       "Bash(flutter pub:*)",
       "mcp__ide__getDiagnostics",
       "Bash(flutter run:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(flutter:*)",
+      "Bash(move libwidgetsfile_tree.dart libwidgetsfile_tree_old.dart)",
+      "Bash(move:*)",
+      "Bash(ren:*)",
+      "Bash(del libwidgetsfile_tree.dart)",
+      "Bash(copy libwidgetsfile_tree_new.dart libwidgetsfile_tree.dart)",
+      "Bash(del libwidgetsfile_tree_new.dart)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
