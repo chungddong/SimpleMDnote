@@ -23,16 +23,16 @@ class _SplitDropZoneState extends State<SplitDropZone> {
   @override
   Widget build(BuildContext context) {
     return DragTarget<String>(
-      onWillAccept: (data) {
+      onWillAcceptWithDetails: (details) {
         setState(() => _isHovering = true);
-        return data != null;
+        return true;
       },
       onLeave: (data) {
         setState(() => _isHovering = false);
       },
-      onAccept: (tabId) {
+      onAcceptWithDetails: (details) {
         setState(() => _isHovering = false);
-        widget.onTabDropped(tabId);
+        widget.onTabDropped(details.data);
       },
       builder: (context, candidateData, rejectedData) {
         return Stack(
@@ -50,7 +50,7 @@ class _SplitDropZoneState extends State<SplitDropZone> {
     return Positioned.fill(
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.highlightColor.withOpacity(0.1),
+          color: AppColors.highlightColor.withValues(alpha: 0.1),
           border: Border.all(
             color: AppColors.highlightColor,
             width: 2,
@@ -120,14 +120,14 @@ class SplitDropOverlay extends StatelessWidget {
             bottom: 0,
             width: 100,
             child: DragTarget<String>(
-              onWillAccept: (data) => data != null,
-              onAccept: (tabId) => onSplit('left', tabId),
+              onWillAcceptWithDetails: (details) => true,
+              onAcceptWithDetails: (details) => onSplit('left', details.data),
               builder: (context, candidateData, rejectedData) {
                 final isHovering = candidateData.isNotEmpty;
                 return Container(
                   decoration: BoxDecoration(
                     color: isHovering 
-                        ? AppColors.highlightColor.withOpacity(0.2)
+                        ? AppColors.highlightColor.withValues(alpha: 0.2)
                         : Colors.transparent,
                     border: isHovering
                         ? Border(right: BorderSide(color: AppColors.highlightColor, width: 2))
@@ -155,14 +155,14 @@ class SplitDropOverlay extends StatelessWidget {
             bottom: 0,
             width: 100,
             child: DragTarget<String>(
-              onWillAccept: (data) => data != null,
-              onAccept: (tabId) => onSplit('right', tabId),
+              onWillAcceptWithDetails: (details) => true,
+              onAcceptWithDetails: (details) => onSplit('right', details.data),
               builder: (context, candidateData, rejectedData) {
                 final isHovering = candidateData.isNotEmpty;
                 return Container(
                   decoration: BoxDecoration(
                     color: isHovering 
-                        ? AppColors.highlightColor.withOpacity(0.2)
+                        ? AppColors.highlightColor.withValues(alpha: 0.2)
                         : Colors.transparent,
                     border: isHovering
                         ? Border(left: BorderSide(color: AppColors.highlightColor, width: 2))
@@ -190,14 +190,14 @@ class SplitDropOverlay extends StatelessWidget {
             top: 0,
             height: 100,
             child: DragTarget<String>(
-              onWillAccept: (data) => data != null,
-              onAccept: (tabId) => onSplit('top', tabId),
+              onWillAcceptWithDetails: (details) => true,
+              onAcceptWithDetails: (details) => onSplit('top', details.data),
               builder: (context, candidateData, rejectedData) {
                 final isHovering = candidateData.isNotEmpty;
                 return Container(
                   decoration: BoxDecoration(
                     color: isHovering 
-                        ? AppColors.highlightColor.withOpacity(0.2)
+                        ? AppColors.highlightColor.withValues(alpha: 0.2)
                         : Colors.transparent,
                     border: isHovering
                         ? Border(bottom: BorderSide(color: AppColors.highlightColor, width: 2))
@@ -225,14 +225,14 @@ class SplitDropOverlay extends StatelessWidget {
             bottom: 0,
             height: 100,
             child: DragTarget<String>(
-              onWillAccept: (data) => data != null,
-              onAccept: (tabId) => onSplit('bottom', tabId),
+              onWillAcceptWithDetails: (details) => true,
+              onAcceptWithDetails: (details) => onSplit('bottom', details.data),
               builder: (context, candidateData, rejectedData) {
                 final isHovering = candidateData.isNotEmpty;
                 return Container(
                   decoration: BoxDecoration(
                     color: isHovering 
-                        ? AppColors.highlightColor.withOpacity(0.2)
+                        ? AppColors.highlightColor.withValues(alpha: 0.2)
                         : Colors.transparent,
                     border: isHovering
                         ? Border(top: BorderSide(color: AppColors.highlightColor, width: 2))

@@ -18,7 +18,7 @@ class CreateItemDialog extends StatefulWidget {
 class _CreateItemDialogState extends State<CreateItemDialog> {
   final _controller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   void dispose() {
@@ -103,7 +103,7 @@ class _CreateItemDialogState extends State<CreateItemDialog> {
                     decoration: InputDecoration(
                       hintText: _hintText,
                       hintStyle: TextStyle(
-                        color: AppColors.textSecondary.withOpacity(0.7),
+                        color: AppColors.textSecondary.withValues(alpha: 0.7),
                       ),
                       suffixText: widget.isFile ? '.md' : null,
                       suffixStyle: const TextStyle(

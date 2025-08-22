@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 import '../models/file_tree_item.dart';
 import '../models/editor_tab.dart';
-import '../services/file_service.dart';
 import '../services/settings_service.dart';
 import '../services/split_view_manager.dart';
 import '../utils/extensions.dart';
@@ -104,20 +103,17 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   Future<void> _onFileSelected(FileTreeItem file) async {
     if (file.isFolder) return;
     
-    print('파일 선택: ${file.name}, 활성 패널: ${_splitViewManager.activePanelId}');
+    debugPrint('파일 선택: ${file.name}, 활성 패널: ${_splitViewManager.activePanelId}');
     
     // 활성 패널에 파일 열기
     final tab = _splitViewManager.openFile(file, targetPanelId: _splitViewManager.activePanelId);
     if (tab != null) {
       // 활성 패널에 내용 로드
       await _loadTabContentForPanel(_splitViewManager.activePanelId, tab);
-      print('파일 오픈 완료: ${tab.title}');
+      debugPrint('파일 오픈 완료: ${tab.title}');
     }
   }
 
-  Future<void> _loadTabContent(EditorTab tab) async {
-    await _loadTabContentForPanel(_splitViewManager.activePanelId, tab);
-  }
 
   Future<void> _loadTabContentForPanel(String panelId, EditorTab tab) async {
     if (tab.file == null) return;
@@ -126,7 +122,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       // 노트 디렉토리 경로 가져오기
       final notesPath = await SettingsService.getNotesPath();
       if (notesPath == null) {
-        print('노트 디렉토리를 찾을 수 없습니다');
+        debugPrint('노트 디렉토리를 찾을 수 없습니다');
         return;
       }
       
@@ -157,14 +153,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         final editorKey = _editorKeys[panelId];
         if (editorKey?.currentState != null) {
           editorKey!.currentState!.setContent(title, displayContent);
-          print('패널 $panelId 에디터에 내용 로드 완료: ${tab.title}');
+          debugPrint('패널 $panelId 에디터에 내용 로드 완료: ${tab.title}');
         } else {
-          print('패널 $panelId 에디터 키를 찾을 수 없음');
+          debugPrint('패널 $panelId 에디터 키를 찾을 수 없음');
         }
       });
     } catch (e) {
-      print('파일 읽기 오류: $e');
-      print('파일 경로: ${tab.file?.path}');
+      debugPrint('파일 읽기 오류: $e');
+      debugPrint('파일 경로: ${tab.file?.path}');
     }
   }
 
@@ -176,7 +172,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       // 노트 디렉토리 경로 가져오기
       final notesPath = await SettingsService.getNotesPath();
       if (notesPath == null) {
-        print('노트 디렉토리를 찾을 수 없습니다');
+        debugPrint('노트 디렉토리를 찾을 수 없습니다');
         return;
       }
       
@@ -199,7 +195,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       // 탭의 수정 상태 업데이트
       _splitViewManager.setTabModified(activeTab.id, false);
     } catch (e) {
-      print('파일 저장 오류: $e');
+      debugPrint('파일 저장 오류: $e');
     }
   }
 
@@ -215,16 +211,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   void _onTabSelected(EditorTab tab) {
-    print('탭 선택됨: ${tab.title} (ID: ${tab.id})');
+    debugPrint('탭 선택됨: ${tab.title} (ID: ${tab.id})');
     
     // 탭이 속한 패널 찾기
     String? panelId = _findPanelForTab(tab.id);
     
     if (panelId != null) {
-      print('패널 ID 찾음: $panelId');
+      debugPrint('패널 ID 찾음: $panelId');
       _onPanelTabSelected(panelId, tab);
     } else {
-      print('패널을 찾을 수 없음: ${tab.id}');
+      debugPrint('패널을 찾을 수 없음: ${tab.id}');
     }
   }
 
@@ -259,7 +255,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   void _onSplit(String direction, String tabId) {
-    print('분할 요청: $direction, 탭 ID: $tabId');
+    debugPrint('분할 요청: $direction, 탭 ID: $tabId');
     
     // 모든 패널에서 탭을 찾기
     EditorTab? draggedTab;
@@ -282,14 +278,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     }
 
     if (draggedTab != null && direction == 'right') {
-      print('수평 분할 실행 중...');
+      debugPrint('수평 분할 실행 중...');
       _splitViewManager.splitHorizontally(draggedTab);
       
       // 새로 생성된 패널의 탭 내용 로드
       final newPanelId = _splitViewManager.activePanelId;
       _loadTabContentForPanel(newPanelId, draggedTab);
       
-      print('분할 완료, 새 패널: $newPanelId');
+      debugPrint('분할 완료, 새 패널: $newPanelId');
     }
   }
 
@@ -315,10 +311,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ),
             Expanded(
               child: DragTarget<FileTreeItem>(
-                onWillAccept: (data) => data != null && !data.isFolder,
-                onAccept: (file) {
-                  print('파일 드롭: ${file.name}');
-                  _onFileSelected(file);
+                onWillAcceptWithDetails: (details) => !details.data.isFolder,
+                onAcceptWithDetails: (details) {
+                  debugPrint('파일 드롭: ${details.data.name}');
+                  _onFileSelected(details.data);
                 },
                 builder: (context, candidateData, rejectedData) {
                   return Stack(
@@ -339,7 +335,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                       size: 48,
                                       color: candidateData.isNotEmpty 
                                           ? AppColors.highlightColor 
-                                          : AppColors.textSecondary.withOpacity(0.5),
+                                          : AppColors.textSecondary.withValues(alpha: 0.5),
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
@@ -376,7 +372,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                 color: AppColors.highlightColor,
                                 width: 2,
                               ),
-                              color: AppColors.highlightColor.withOpacity(0.1),
+                              color: AppColors.highlightColor.withValues(alpha: 0.1),
                             ),
                           ),
                         ),
@@ -407,7 +403,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
           ),
           Container(
             width: 1,
-            color: AppColors.textSecondary.withOpacity(0.3),
+            color: AppColors.textSecondary.withValues(alpha: 0.3),
           ),
           Expanded(
             flex: (splitView.weights[1] * 100).round(),
@@ -434,7 +430,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       child: Container(
         decoration: BoxDecoration(
           border: _splitViewManager.activePanelId == panel.id 
-              ? Border.all(color: AppColors.highlightColor.withOpacity(0.3), width: 1)
+              ? Border.all(color: AppColors.highlightColor.withValues(alpha: 0.3), width: 1)
               : null,
         ),
         child: Column(
@@ -448,11 +444,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ),
             Expanded(
               child: DragTarget<FileTreeItem>(
-                onWillAccept: (data) => data != null && !data.isFolder,
-                onAccept: (file) {
-                  print('파일 드롭 to 패널 ${panel.id}: ${file.name}');
+                onWillAcceptWithDetails: (details) => !details.data.isFolder,
+                onAcceptWithDetails: (details) {
+                  debugPrint('파일 드롭 to 패널 ${panel.id}: ${details.data.name}');
                   // 해당 패널에 파일 열기
-                  final tab = _splitViewManager.openFile(file, targetPanelId: panel.id);
+                  final tab = _splitViewManager.openFile(details.data, targetPanelId: panel.id);
                   if (tab != null) {
                     _loadTabContentForPanel(panel.id, tab);
                   }
@@ -476,7 +472,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                       size: 32,
                                       color: candidateData.isNotEmpty 
                                           ? AppColors.highlightColor 
-                                          : AppColors.textSecondary.withOpacity(0.5),
+                                          : AppColors.textSecondary.withValues(alpha: 0.5),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
@@ -513,7 +509,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                                 color: AppColors.highlightColor,
                                 width: 2,
                               ),
-                              color: AppColors.highlightColor.withOpacity(0.1),
+                              color: AppColors.highlightColor.withValues(alpha: 0.1),
                             ),
                           ),
                         ),
@@ -529,7 +525,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   void _onPanelTabSelected(String panelId, EditorTab tab) {
-    print('패널 $panelId에서 탭 선택: ${tab.title}');
+    debugPrint('패널 $panelId에서 탭 선택: ${tab.title}');
     
     // 패널과 탭을 즉시 활성화 (상태 변경 먼저)
     _splitViewManager.setActivePanel(panelId);

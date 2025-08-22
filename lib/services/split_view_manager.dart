@@ -227,12 +227,6 @@ class SplitViewManager extends ChangeNotifier {
     }
   }
 
-  void _removeTabFromMainPanel(String tabId) {
-    final tabIndex = _mainPanel.tabs.indexWhere((tab) => tab.id == tabId);
-    if (tabIndex != -1) {
-      _removeTabFromPanel('main', tabIndex);
-    }
-  }
 
   void _removeTabFromAnyPanel(String tabId) {
     for (final panel in _getAllPanels()) {

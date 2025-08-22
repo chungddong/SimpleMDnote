@@ -12,7 +12,7 @@ class FileService {
   static Future<List<FileTreeItem>> loadFileTree() async {
     // 웹 환경에서는 테스트 데이터 제공
     if (kIsWeb) {
-      print('Web environment detected, using mock data');
+      debugPrint('Web environment detected, using mock data');
       return _getMockFileTree();
     }
 
@@ -38,10 +38,10 @@ class FileService {
           children: children,
         ),
       ];
-      print('Loaded ${children.length} items in root folder from $notesPath');
+      debugPrint('Loaded ${children.length} items in root folder from $notesPath');
       return result;
     } catch (e) {
-      print('Error loading file tree: $e');
+      debugPrint('Error loading file tree: $e');
       return [];
     }
   }
@@ -122,7 +122,7 @@ class FileService {
         }
       }
     } catch (e) {
-      print('Error reading directory: $e');
+      debugPrint('Error reading directory: $e');
     }
 
     return items;
@@ -131,7 +131,7 @@ class FileService {
   static Future<bool> createFile(String fileName, {String? parentPath}) async {
     // 웹 환경에서는 시뮬레이션
     if (kIsWeb) {
-      print('Mock: Creating file $fileName in ${parentPath ?? 'root'}');
+      debugPrint('Mock: Creating file $fileName in ${parentPath ?? 'root'}');
       await Future.delayed(const Duration(milliseconds: 500));
       return true;
     }
@@ -163,10 +163,10 @@ class FileService {
       }
 
       await file.writeAsString('# $fileName\n\n');
-      print('Successfully created file: $filePath');
+      debugPrint('Successfully created file: $filePath');
       return true;
     } catch (e) {
-      print('Error creating file: $e');
+      debugPrint('Error creating file: $e');
       return false;
     }
   }
@@ -174,7 +174,7 @@ class FileService {
   static Future<bool> createFolder(String folderName, {String? parentPath}) async {
     // 웹 환경에서는 시뮬레이션
     if (kIsWeb) {
-      print('Mock: Creating folder $folderName in ${parentPath ?? 'root'}');
+      debugPrint('Mock: Creating folder $folderName in ${parentPath ?? 'root'}');
       await Future.delayed(const Duration(milliseconds: 500));
       return true;
     }
@@ -196,10 +196,10 @@ class FileService {
       }
 
       directory.createSync(recursive: true);
-      print('Successfully created folder: $folderPath');
+      debugPrint('Successfully created folder: $folderPath');
       return true;
     } catch (e) {
-      print('Error creating folder: $e');
+      debugPrint('Error creating folder: $e');
       return false;
     }
   }
@@ -214,7 +214,7 @@ class FileService {
 
       return await file.readAsString();
     } catch (e) {
-      print('Error reading file: $e');
+      debugPrint('Error reading file: $e');
       return null;
     }
   }
@@ -235,7 +235,7 @@ class FileService {
       await file.writeAsString(content);
       return true;
     } catch (e) {
-      print('Error writing file: $e');
+      debugPrint('Error writing file: $e');
       return false;
     }
   }
@@ -251,7 +251,7 @@ class FileService {
       await file.delete();
       return true;
     } catch (e) {
-      print('Error deleting file: $e');
+      debugPrint('Error deleting file: $e');
       return false;
     }
   }
@@ -267,7 +267,7 @@ class FileService {
       await directory.delete(recursive: true);
       return true;
     } catch (e) {
-      print('Error deleting folder: $e');
+      debugPrint('Error deleting folder: $e');
       return false;
     }
   }

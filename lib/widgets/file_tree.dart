@@ -129,23 +129,17 @@ class _FileTreeState extends State<FileTree> {
 
       if (success) {
         widget.onRefresh?.call();
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${isFile ? '파일' : '폴더'}이 생성되었습니다.'),
-              backgroundColor: AppColors.highlightColor,
-            ),
-          );
-        }
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${isFile ? '파일' : '폴더'} 생성에 실패했습니다.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(success 
+                ? '${isFile ? '파일' : '폴더'}이 생성되었습니다.'
+                : '${isFile ? '파일' : '폴더'} 생성에 실패했습니다.'),
+            backgroundColor: success ? AppColors.highlightColor : Colors.red,
+          ),
+        );
       }
     }
   }
@@ -165,13 +159,13 @@ class _FileTreeState extends State<FileTree> {
             Icon(
               Icons.folder_open,
               size: 48,
-              color: AppColors.textSecondary.withOpacity(0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
               '파일이 없습니다',
               style: TextStyle(
-                color: AppColors.textSecondary.withOpacity(0.7),
+                color: AppColors.textSecondary.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),
@@ -255,9 +249,9 @@ class _FileTreeItemWidgetState extends State<FileTreeItemWidget> {
                 padding: EdgeInsets.only(left: 8 + indent),
                 decoration: BoxDecoration(
                   color: widget.item.isSelected
-                      ? AppColors.highlightColor.withOpacity(0.2)
+                      ? AppColors.highlightColor.withValues(alpha: 0.2)
                       : _isHovered
-                          ? AppColors.textSecondary.withOpacity(0.1)
+                          ? AppColors.textSecondary.withValues(alpha: 0.1)
                           : null,
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -341,7 +335,7 @@ class _FileTreeItemWidgetState extends State<FileTreeItemWidget> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.highlightColor.withOpacity(0.9),
+                    color: AppColors.highlightColor.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
@@ -370,7 +364,7 @@ class _FileTreeItemWidgetState extends State<FileTreeItemWidget> {
                 margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                 padding: EdgeInsets.only(left: 8 + indent),
                 decoration: BoxDecoration(
-                  color: AppColors.textSecondary.withOpacity(0.3),
+                  color: AppColors.textSecondary.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Row(
@@ -379,14 +373,14 @@ class _FileTreeItemWidgetState extends State<FileTreeItemWidget> {
                     Icon(
                       Icons.note,
                       size: 16,
-                      color: AppColors.textSecondary.withOpacity(0.5),
+                      color: AppColors.textSecondary.withValues(alpha: 0.5),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         widget.item.name,
                         style: TextStyle(
-                          color: AppColors.textSecondary.withOpacity(0.5),
+                          color: AppColors.textSecondary.withValues(alpha: 0.5),
                           fontSize: 13,
                         ),
                       ),
@@ -402,9 +396,9 @@ class _FileTreeItemWidgetState extends State<FileTreeItemWidget> {
                   padding: EdgeInsets.only(left: 8 + indent),
                   decoration: BoxDecoration(
                     color: widget.item.isSelected
-                        ? AppColors.highlightColor.withOpacity(0.2)
+                        ? AppColors.highlightColor.withValues(alpha: 0.2)
                         : _isHovered
-                            ? AppColors.textSecondary.withOpacity(0.1)
+                            ? AppColors.textSecondary.withValues(alpha: 0.1)
                             : null,
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -501,7 +495,7 @@ class _CreateButton extends StatelessWidget {
       label: Text(label),
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.textSecondary,
-        side: BorderSide(color: AppColors.textSecondary.withOpacity(0.3)),
+        side: BorderSide(color: AppColors.textSecondary.withValues(alpha: 0.3)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     );

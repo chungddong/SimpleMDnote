@@ -45,7 +45,7 @@ class _SideBarState extends State<SideBar> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading file tree: $e');
+      debugPrint('Error loading file tree: $e');
       setState(() {
         _fileTreeItems = [];
         _isLoading = false;
@@ -64,7 +64,7 @@ class _SideBarState extends State<SideBar> {
   }
 
   void _onItemToggled(FileTreeItem item) {
-    print('폴더 토글: ${item.name} (${item.isExpanded ? '펼침' : '접힘'})');
+    debugPrint('폴더 토글: ${item.name} (${item.isExpanded ? '펼침' : '접힘'})');
   }
 
   @override
@@ -97,7 +97,7 @@ class _SideBarState extends State<SideBar> {
             color: AppColors.sidebarBackground,
             border: Border(
               bottom: BorderSide(
-                color: AppColors.textSecondary.withOpacity(0.2),
+                color: AppColors.textSecondary.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -137,7 +137,7 @@ class _SideBarState extends State<SideBar> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    print('새 노트 추가');
+                    debugPrint('새 노트 추가');
                   },
                   child: Container(
                     padding: const EdgeInsets.all(4),
@@ -188,7 +188,7 @@ class _SideBarState extends State<SideBar> {
             color: AppColors.sidebarBackground,
             border: Border(
               bottom: BorderSide(
-                color: AppColors.textSecondary.withOpacity(0.2),
+                color: AppColors.textSecondary.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -222,7 +222,7 @@ class _SideBarState extends State<SideBar> {
                   margin: const EdgeInsets.symmetric(vertical: 2),
                   child: Material(
                     color: item.isSelected 
-                        ? AppColors.highlightColor.withOpacity(0.1)
+                        ? AppColors.highlightColor.withValues(alpha: 0.1)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                     child: InkWell(
@@ -236,7 +236,7 @@ class _SideBarState extends State<SideBar> {
                               : Icons.description_outlined,
                           size: 18,
                           color: item.isFolder 
-                              ? AppColors.highlightColor.withOpacity(0.8)
+                              ? AppColors.highlightColor.withValues(alpha: 0.8)
                               : AppColors.textSecondary,
                         ),
                       ),

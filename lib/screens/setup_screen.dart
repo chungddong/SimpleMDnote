@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../constants/app_colors.dart';
-import '../constants/app_constants.dart';
 import '../services/settings_service.dart';
 import '../widgets/main_screen.dart';
 
@@ -126,7 +125,7 @@ class _SetupScreenState extends State<SetupScreen> {
                   color: AppColors.editorBackground,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppColors.textSecondary.withOpacity(0.2),
+                    color: AppColors.textSecondary.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -240,7 +239,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 '선택한 폴더에 마크다운 파일들이 저장됩니다.\n언제든지 설정에서 변경할 수 있습니다.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.textSecondary.withOpacity(0.8),
+                  color: AppColors.textSecondary.withValues(alpha: 0.8),
                   fontSize: 13,
                   height: 1.4,
                 ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import '../constants/app_colors.dart';
 import '../models/editor_tab.dart';
 
@@ -75,13 +74,13 @@ class _TabBarWidgetState extends State<TabBarWidget> {
                     childWhenDragging: Container(
                       width: 120,
                       height: 40,
-                      color: AppColors.tabBackground.withOpacity(0.5),
+                      color: AppColors.tabBackground.withValues(alpha: 0.5),
                     ),
                     child: DragTarget<String>(
-                      onWillAccept: (data) => data != null && data != tab.id,
-                      onAccept: (draggedTabId) {
+                      onWillAcceptWithDetails: (details) => details.data != tab.id,
+                      onAcceptWithDetails: (details) {
                         // 드래그된 탭의 인덱스 찾기
-                        final draggedIndex = widget.tabs.indexWhere((t) => t.id == draggedTabId);
+                        final draggedIndex = widget.tabs.indexWhere((t) => t.id == details.data);
                         if (draggedIndex != -1 && draggedIndex != index) {
                           widget.onTabReordered(draggedIndex, index);
                         }
@@ -149,7 +148,7 @@ class _TabWidgetState extends State<TabWidget> {
             color: isActive 
                 ? AppColors.editorBackground 
                 : _isHovered 
-                    ? AppColors.tabBackground.withOpacity(0.8)
+                    ? AppColors.tabBackground.withValues(alpha: 0.8)
                     : AppColors.tabBackground,
             border: Border(
               bottom: BorderSide(
@@ -159,7 +158,7 @@ class _TabWidgetState extends State<TabWidget> {
                 width: 2,
               ),
               right: BorderSide(
-                color: AppColors.textSecondary.withOpacity(0.2),
+                color: AppColors.textSecondary.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
