@@ -5,12 +5,13 @@ import '../models/file_tree_item.dart';
 import '../models/editor_tab.dart';
 import '../services/settings_service.dart';
 import '../services/split_view_manager.dart';
+import '../models/split_view.dart';
 import '../utils/extensions.dart';
 import 'sidebar.dart';
 import 'tab_bar_widget.dart';
 import 'markdown_editor.dart';
 import 'format_toolbar.dart';
-import 'split_drop_zone.dart';
+import 'split_drop_overlay.dart' as overlay;
 import 'dart:io';
 import 'dart:async';
 import 'package:path/path.dart' as path;
@@ -254,40 +255,53 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     // 우클릭 컨텍스트 메뉴 표시 (나중에 구현)
   }
 
-  void _onSplit(String direction, String tabId) {
-    debugPrint('분할 요청: $direction, 탭 ID: $tabId');
+  void _onTabPinToggle(String tabId) {
+    debugPrint('탭 고정 토글: $tabId');
+    _splitViewManager.toggleTabPin(tabId);
+  }
+
+  void _onTabDropped(String tabId, overlay.DropZone zone) {
+    debugPrint('탭 드롭: $tabId to $zone');
     
-    // 모든 패널에서 탭을 찾기
+    // 드래그된 탭 찾기
     EditorTab? draggedTab;
+    for (final panel in _splitViewManager.splitView?.panels ?? [_splitViewManager.activePanel]) {
+      final tab = panel.tabs.where((t) => t.id == tabId).firstOrNull;
+      if (tab != null) {
+        draggedTab = tab;
+        break;
+      }
+    }
     
-    // 메인 패널에서 찾기
+    // 메인 패널에서도 찾기
     final mainTab = _splitViewManager.activePanel.tabs.where((t) => t.id == tabId).firstOrNull;
     if (mainTab != null) {
       draggedTab = mainTab;
     }
     
-    // 분할된 패널들에서 찾기
-    if (draggedTab == null && _splitViewManager.splitView != null) {
-      for (final panel in _splitViewManager.splitView!.panels) {
-        final tab = panel.tabs.where((t) => t.id == tabId).firstOrNull;
-        if (tab != null) {
-          draggedTab = tab;
-          break;
-        }
-      }
-    }
-
-    if (draggedTab != null && direction == 'right') {
-      debugPrint('수평 분할 실행 중...');
-      _splitViewManager.splitHorizontally(draggedTab);
-      
-      // 새로 생성된 패널의 탭 내용 로드
-      final newPanelId = _splitViewManager.activePanelId;
-      _loadTabContentForPanel(newPanelId, draggedTab);
-      
-      debugPrint('분할 완료, 새 패널: $newPanelId');
+    if (draggedTab == null) return;
+    
+    switch (zone) {
+      case overlay.DropZone.left:
+        _splitViewManager.splitViewByDirection(draggedTab, 'left');
+        break;
+      case overlay.DropZone.right:
+        _splitViewManager.splitViewByDirection(draggedTab, 'right');
+        break;
+      case overlay.DropZone.top:
+        _splitViewManager.splitViewByDirection(draggedTab, 'top');
+        break;
+      case overlay.DropZone.bottom:
+        _splitViewManager.splitViewByDirection(draggedTab, 'bottom');
+        break;
+      case overlay.DropZone.center:
+        // 중앙 드롭 시에는 현재 활성 패널에 탭만 추가
+        final activePanelId = _splitViewManager.activePanelId;
+        _splitViewManager.addTabToPanel(tabId, activePanelId);
+        break;
     }
   }
+
 
   Widget _buildEditorArea() {
     if (_splitViewManager.isSplit) {
@@ -298,25 +312,29 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildSingleEditor() {
-    return Stack(
-      children: [
-        Column(
-          children: [
-            TabBarWidget(
-              tabs: _splitViewManager.activeTabs,
-              onTabSelected: _onTabSelected,
-              onTabClosed: _onTabClosed,
-              onTabReordered: _onTabReordered,
-              onTabRightClick: _onTabRightClick,
-            ),
-            Expanded(
-              child: DragTarget<FileTreeItem>(
-                onWillAcceptWithDetails: (details) => !details.data.isFolder,
-                onAcceptWithDetails: (details) {
-                  debugPrint('파일 드롭: ${details.data.name}');
-                  _onFileSelected(details.data);
-                },
-                builder: (context, candidateData, rejectedData) {
+    return overlay.SplitDropOverlay(
+      onTabDropped: _onTabDropped,
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              TabBarWidget(
+                tabs: _splitViewManager.activeTabs,
+                onTabSelected: _onTabSelected,
+                onTabClosed: _onTabClosed,
+                onTabReordered: _onTabReordered,
+                onTabRightClick: _onTabRightClick,
+                onTabPinToggle: _onTabPinToggle,
+                isSplitView: false,
+              ),
+              Expanded(
+                child: DragTarget<FileTreeItem>(
+                  onWillAcceptWithDetails: (details) => !details.data.isFolder,
+                  onAcceptWithDetails: (details) {
+                    debugPrint('파일 드롭: ${details.data.name}');
+                    _onFileSelected(details.data);
+                  },
+                  builder: (context, candidateData, rejectedData) {
                   return Stack(
                     children: [
                       _splitViewManager.activeTab != null
@@ -383,11 +401,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
-        // 분할을 위한 드롭 오버레이
-        SplitDropOverlay(
-          onSplit: _onSplit,
-        ),
       ],
+      ),
     );
   }
 
@@ -395,22 +410,43 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     final splitView = _splitViewManager.splitView!;
     
     if (splitView.panels.length == 2) {
-      return Row(
-        children: [
-          Expanded(
-            flex: (splitView.weights[0] * 100).round(),
-            child: _buildPanelEditor(splitView.panels[0]),
-          ),
-          Container(
-            width: 1,
-            color: AppColors.textSecondary.withValues(alpha: 0.3),
-          ),
-          Expanded(
-            flex: (splitView.weights[1] * 100).round(),
-            child: _buildPanelEditor(splitView.panels[1]),
-          ),
-        ],
-      );
+      final isHorizontal = splitView.direction == SplitDirection.horizontal;
+      
+      if (isHorizontal) {
+        return Row(
+          children: [
+            Expanded(
+              flex: (splitView.weights[0] * 100).round(),
+              child: _buildPanelEditor(splitView.panels[0]),
+            ),
+            Container(
+              width: 1,
+              color: AppColors.textSecondary.withValues(alpha: 0.3),
+            ),
+            Expanded(
+              flex: (splitView.weights[1] * 100).round(),
+              child: _buildPanelEditor(splitView.panels[1]),
+            ),
+          ],
+        );
+      } else {
+        return Column(
+          children: [
+            Expanded(
+              flex: (splitView.weights[0] * 100).round(),
+              child: _buildPanelEditor(splitView.panels[0]),
+            ),
+            Container(
+              height: 1,
+              color: AppColors.textSecondary.withValues(alpha: 0.3),
+            ),
+            Expanded(
+              flex: (splitView.weights[1] * 100).round(),
+              child: _buildPanelEditor(splitView.panels[1]),
+            ),
+          ],
+        );
+      }
     }
     
     return _buildSingleEditor(); // fallback
@@ -425,6 +461,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
         // 패널 클릭 시 해당 패널을 활성화
         if (_splitViewManager.activePanelId != panel.id) {
           _splitViewManager.setActivePanel(panel.id);
+          // 패널에 활성 탭이 있다면 그 탭을 활성화
+          if (panel.activeTab != null) {
+            _splitViewManager.setActiveTab(panel.activeTab!.id);
+          }
         }
       },
       child: Container(
@@ -441,6 +481,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               onTabClosed: _onTabClosed,
               onTabReordered: _onTabReordered,
               onTabRightClick: _onTabRightClick,
+              onTabPinToggle: _onTabPinToggle,
+              isSplitView: true,
             ),
             Expanded(
               child: DragTarget<FileTreeItem>(

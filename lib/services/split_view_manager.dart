@@ -92,22 +92,51 @@ class SplitViewManager extends ChangeNotifier {
     }
   }
 
-  void splitHorizontally(EditorTab draggedTab) {
+  void splitViewByDirection(EditorTab draggedTab, String direction) {
     // 먼저 드래그된 탭을 원래 위치에서 제거
     _removeTabFromAnyPanel(draggedTab.id);
     
     if (_splitView == null) {
       // 처음 분할하는 경우
-      final rightPanel = EditorPanel(
-        id: 'right',
+      String newPanelId;
+      switch (direction) {
+        case 'right':
+          newPanelId = 'right';
+          break;
+        case 'left':
+          newPanelId = 'left';
+          break;
+        case 'top':
+          newPanelId = 'top';
+          break;
+        case 'bottom':
+          newPanelId = 'bottom';
+          break;
+        default:
+          newPanelId = 'right';
+      }
+      
+      final newPanel = EditorPanel(
+        id: newPanelId,
         tabs: [draggedTab.copyWith(isActive: true)],
         activeTab: draggedTab.copyWith(isActive: true),
       );
 
+      final splitDirection = (direction == 'left' || direction == 'right') 
+          ? SplitDirection.horizontal 
+          : SplitDirection.vertical;
+          
+      List<EditorPanel> panels;
+      if (direction == 'left' || direction == 'top') {
+        panels = [newPanel, _mainPanel];
+      } else {
+        panels = [_mainPanel, newPanel];
+      }
+
       _splitView = SplitView(
         id: 'main_split',
-        direction: SplitDirection.horizontal,
-        panels: [_mainPanel, rightPanel],
+        direction: splitDirection,
+        panels: panels,
         weights: [0.5, 0.5],
       );
     } else {
@@ -127,8 +156,59 @@ class SplitViewManager extends ChangeNotifier {
       );
     }
 
-    _activePanelId = _splitView!.panels.last.id;
+    if (_splitView != null) {
+      _activePanelId = _splitView!.panels.last.id;
+    }
     notifyListeners();
+  }
+  
+  void addTabToPanel(String tabId, String targetPanelId) {
+    // 기존 위치에서 탭 제거
+    EditorTab? draggedTab;
+    
+    for (final panel in _getAllPanels()) {
+      final tab = panel.tabs.where((t) => t.id == tabId).firstOrNull;
+      if (tab != null) {
+        draggedTab = tab;
+        break;
+      }
+    }
+    
+    if (draggedTab == null) return;
+    
+    _removeTabFromAnyPanel(tabId);
+    
+    // 대상 패널에 탭 추가
+    if (targetPanelId == 'main') {
+      final updatedTabs = List<EditorTab>.from(_mainPanel.tabs)
+        ..add(draggedTab.copyWith(isActive: true));
+      _mainPanel = _mainPanel.copyWith(
+        tabs: updatedTabs,
+        activeTab: draggedTab.copyWith(isActive: true),
+      );
+    } else if (_splitView != null) {
+      final panelIndex = _splitView!.panels.indexWhere((p) => p.id == targetPanelId);
+      if (panelIndex != -1) {
+        final panel = _splitView!.panels[panelIndex];
+        final updatedTabs = List<EditorTab>.from(panel.tabs)
+          ..add(draggedTab.copyWith(isActive: true));
+        final updatedPanel = panel.copyWith(
+          tabs: updatedTabs,
+          activeTab: draggedTab.copyWith(isActive: true),
+        );
+        final updatedPanels = List<EditorPanel>.from(_splitView!.panels);
+        updatedPanels[panelIndex] = updatedPanel;
+        _splitView = _splitView!.copyWith(panels: updatedPanels);
+      }
+    }
+    
+    _activePanelId = targetPanelId;
+    notifyListeners();
+  }
+
+  // 기존 splitHorizontally 메서드를 호환성을 위해 유지
+  void splitHorizontally(EditorTab draggedTab) {
+    splitViewByDirection(draggedTab, 'right');
   }
 
   void closeSplit() {
@@ -292,6 +372,52 @@ class SplitViewManager extends ChangeNotifier {
         final updatedPanels = List<EditorPanel>.from(_splitView!.panels);
         updatedPanels[panelIndex] = updatedPanel;
         _splitView = _splitView!.copyWith(panels: updatedPanels);
+      }
+    }
+  }
+
+  void toggleTabPin(String tabId) {
+    EditorTab? tab;
+    String? panelId;
+    
+    // 탭 찾기
+    for (final panel in _getAllPanels()) {
+      tab = panel.tabs.where((t) => t.id == tabId).firstOrNull;
+      if (tab != null) {
+        panelId = panel.id;
+        break;
+      }
+    }
+    
+    if (tab != null && panelId != null) {
+      final updatedTab = tab.copyWith(isPinned: !(tab.isPinned ?? false));
+      _updateTabInPanel(panelId, updatedTab);
+      notifyListeners();
+    }
+  }
+
+  void _updateTabInPanel(String panelId, EditorTab updatedTab) {
+    if (panelId == 'main') {
+      final updatedTabs = List<EditorTab>.from(_mainPanel.tabs);
+      final tabIndex = updatedTabs.indexWhere((t) => t.id == updatedTab.id);
+      if (tabIndex != -1) {
+        updatedTabs[tabIndex] = updatedTab;
+        _mainPanel = _mainPanel.copyWith(tabs: updatedTabs);
+      }
+    } else if (_splitView != null) {
+      final panelIndex = _splitView!.panels.indexWhere((p) => p.id == panelId);
+      if (panelIndex != -1) {
+        final panel = _splitView!.panels[panelIndex];
+        final updatedTabs = List<EditorTab>.from(panel.tabs);
+        final tabIndex = updatedTabs.indexWhere((t) => t.id == updatedTab.id);
+        
+        if (tabIndex != -1) {
+          updatedTabs[tabIndex] = updatedTab;
+          final updatedPanel = panel.copyWith(tabs: updatedTabs);
+          final updatedPanels = List<EditorPanel>.from(_splitView!.panels);
+          updatedPanels[panelIndex] = updatedPanel;
+          _splitView = _splitView!.copyWith(panels: updatedPanels);
+        }
       }
     }
   }

@@ -6,6 +6,7 @@ class EditorTab {
   final FileTreeItem? file;
   bool isModified;
   bool isActive;
+  bool? isPinned;
 
   EditorTab({
     required this.id,
@@ -13,6 +14,7 @@ class EditorTab {
     this.file,
     this.isModified = false,
     this.isActive = false,
+    this.isPinned = false,
   });
 
   EditorTab copyWith({
@@ -21,6 +23,7 @@ class EditorTab {
     FileTreeItem? file,
     bool? isModified,
     bool? isActive,
+    bool? isPinned,
   }) {
     return EditorTab(
       id: id ?? this.id,
@@ -28,6 +31,7 @@ class EditorTab {
       file: file ?? this.file,
       isModified: isModified ?? this.isModified,
       isActive: isActive ?? this.isActive,
+      isPinned: isPinned ?? this.isPinned,
     );
   }
 
